@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: manifest
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - DB_HOST=db
+      - DB_USER=manifest_user
+      - DB_PASSWORD=1234
+      - DB_NAME=manifest_app
+      - PORT=3000
+    depends_on:
+      - db
+    networks:
+      - journal-network
+
+  db:
+    image: mysql:8.0
+    container_name: journal-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=manifest_app
+      - MYSQL_USER=manifest_user
+      - MYSQL_PASSWORD=1234
+    ports:
+      - '3307:3307'
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - journal-network
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: unless-stopped
+    ports:
+      - '8090:8080'
+    networks:
+      - journal-network
+
+volumes:
+  db_data:
+
+networks:
+  journal-network:
+    driver: bridge
